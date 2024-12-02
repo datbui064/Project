@@ -1,0 +1,208 @@
+﻿@page "/add"
+@using Radzen
+@using Radzen.Blazor
+@inject NavigationManager NavigationManager
+
+
+<PageTitle>Trang chủ</PageTitle>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <title>Student Portal</title>
+    <style>
+        /* CSS styles go here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 30px;
+            padding: 30px;
+            
+        }
+
+        .section {
+            background-color: #f2f2f2;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+            .section:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.06);
+            }
+
+            .section h2 {
+                margin-top: 0;
+                font-size: 30px;
+                font-weight: bold;
+                
+            }
+
+            .section ul {
+                list-style-type: none;
+                padding: 0;
+            }
+
+            .section li {
+                margin-bottom: 15px;
+                font-size: 22px;
+                display: flex;
+                align-items: center;
+            }
+
+            .section .icon {
+                width: 30px;
+                height: 30px;
+                margin-right: 20px;
+                color: #666;
+            }
+
+            .section .link {
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                color: #333;
+                text-decoration: none;
+                transition: color 0.3s;
+                margin-bottom: 15px;
+                font-size: 22px;
+                transition: color 0.3s, transform 0.3s;
+               
+            }
+
+                .section .link:hover {
+                    color: #007bff;
+                    transform: scale(1.055);
+                }
+
+                    .section .link:hover .icon {
+                        color: #007bff;
+                    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h2>Thông tin người dùng</h2>
+            <ul>
+                <li>Name: Nguyen Viet Anh</li>
+                <li>Student ID: CACLC4</li>
+            </ul>
+        </div>
+        <div class="section">
+            <h2>Quick Links</h2>
+            <ul>
+                <li class="link">
+                    <i data-feather="edit" class="icon"></i>
+                    Đổi lớp
+                </li>
+                <li class="link">
+                    <i data-feather="log-out" class="icon"></i>
+                    Đăng xuất
+                </li>
+                <li class="link">
+                    <i data-feather="message-circle" class="icon"></i>
+                    Nhắn tin
+                </li>
+            </ul>
+        </div>
+        <div class="section">
+            <h2>Thông tin bài giảng</h2>
+            <ul>
+                <NavLink class="link" href="/BaiGiang">
+                    <i data-feather="book" class="icon"></i>
+                    Bài giảng
+                </NavLink>
+                <NavLink class="link" href="/BaoCao">
+                    <i data-feather="file-text" class="icon"></i>
+                    Báo cáo
+                </NavLink>
+                <NavLink class="link" href="/CauHoi">
+                    <i data-feather="help-circle" class="icon"></i>
+                    Câu hỏi
+                </NavLink>
+                <NavLink class="link" href="/DeCuong">
+                    <i data-feather="book" class="icon"></i>
+                   Đề Cương
+                </NavLink>
+                <NavLink class="link" href="/KeHoachGiangDay">
+                    <i data-feather="clipboard" class="icon"></i>
+                    Kế Hoạch Giảng Dạy
+                </NavLink>
+                <NavLink class="link" href="/PhuongTienCongCu">
+                    <i data-feather="database" class="icon"></i>
+                    Phương Tiện Công Cụ
+                </NavLink>
+                <NavLink class="link" href="/TaiLieuHocTap">
+                    <i data-feather="book-open" class="icon"></i>
+                    Tài Liệu Học Tập
+                </NavLink>
+                <NavLink class="link" href="/QuyetDinh">
+                    <i data-feather="file-text" class="icon"></i>
+                    Quyết Định
+                </NavLink>
+                
+            </ul>
+        </div>
+        <div class="section">
+            <h2>Liên hệ</h2>
+            <ul>
+                <li class="link">
+                    <i data-feather="user" class="icon"></i>
+                    Thông tin liên hệ
+                </li>
+                <li class="link">
+                    <i data-feather="message-circle" class="icon"></i>
+                    Diễn đàn
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        feather.replace();
+    </script>
+</body>
+</html>
+@code {
+    private void NavigateToBaiGiang()
+    {
+        NavigationManager.NavigateTo("/BaiGiang");
+    }
+    private void NavigateToBaoCao()
+    {
+        NavigationManager.NavigateTo("/BaoCao");
+    }private void NavigateToCauHoi()
+    {
+        NavigationManager.NavigateTo("/CauHoi");
+    }
+    private void NavigateToDeCuong()
+    {
+        NavigationManager.NavigateTo("/DeCuong");
+    }
+    private void NavigateToKeHoachGiangDay()
+    {
+        NavigationManager.NavigateTo("/KeHoachGiangDay");
+    }
+    private void NavigateToPhuongTienCongCu()
+    {
+        NavigationManager.NavigateTo("/PhuongTienCongCu");
+    }
+    private void NavigateToQuyetDinh()
+    {
+        NavigationManager.NavigateTo("/QuyetDinh");
+    }
+    private void NavigateToTaiLieuHocTap()
+    {
+        NavigationManager.NavigateTo("/TaiLieuHocTap");
+    }
+
+}

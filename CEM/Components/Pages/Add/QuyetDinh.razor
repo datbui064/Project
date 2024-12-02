@@ -1,0 +1,129 @@
+﻿@page "/QuyetDinh"
+@using CEM.Models
+@using Radzen.Blazor
+@using Radzen
+@inject QlbContext _context
+@inject NotificationService Notification
+@inject MinIOService MinIOService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<head>
+    <link rel="stylesheet" href="ViewAdd.css">
+</head>
+<h3 class="form-title">Tập 1: Quyết Định Đào Tạo</h3>
+
+<div class="container">
+    <div class="form-container">
+        <div class="form-group">
+            <label class="form-label">Mã Quyết Định:</label>
+            <RadzenTextBox class="input-field" @bind-Value="quyetdinh.MaQuyetDinh" Required="true" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Tên Học Phần Môn Học:</label>
+            <RadzenTextBox class="input-field" @bind-Value="quyetdinh.TieuDe" Required="true" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Mô Tả Nội Dung:</label>
+            <RadzenTextBox class="input-field" @bind-Value="quyetdinh.MoTa" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Select Date:</label>
+            <RadzenDatePicker class="input-field" @bind-Value="quyetdinh.NgayBanHanh" Name="RadzenDatePickerBindValue" />
+        </div>
+        
+        
+
+        <div class="form-group">
+            <label class="form-label">File Đính Kèm:</label>
+            <InputFile class="input-field" OnChange="@HandleFileSelected" />
+        </div>
+
+        <p class="status-message">@statusMessage</p>
+
+        <div class="text-right">
+            <RadzenButton class="submit-button" Shade="Shade.Lighter" Click="@Them" Text="Lưu dữ liệu" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+
+       
+
+    </div>
+</div>
+
+@code {
+    private QuyetDinh quyetdinh = new QuyetDinh();
+    private Stream? fileStream;
+    private string? fileName;
+    private string? statusMessage;
+
+    private string selectedBucket = "quyetdinh";
+
+    private async Task Them()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(quyetdinh.MaQuyetDinh) || string.IsNullOrEmpty(quyetdinh.TieuDe))
+            {
+                Notification.Notify(new NotificationMessage
+                    {
+                        Severity = NotificationSeverity.Error,
+                        Summary = "Lỗi",
+                        Detail = "Mã Quyết Định và Tên Học Phần là bắt buộc!",
+                        Duration = 4000
+                    });
+                return;
+            }
+
+            _context.QuyetDinhs.Add(quyetdinh);
+            await _context.SaveChangesAsync();
+
+            if (fileStream != null && !string.IsNullOrEmpty(fileName))
+            {
+                var success = await MinIOService.UploadFileAsync(fileStream, fileName, selectedBucket); // Assuming null for tags
+                if (!success)
+                {
+                    throw new Exception("File upload failed.");
+                }
+            }
+
+            Notification.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Thành công",
+                    Detail = "Dữ liệu đã được lưu thành công!",
+                    Duration = 4000
+                });
+
+            // Clear form fields after saving
+            quyetdinh = new QuyetDinh();
+            fileStream = null;
+            fileName = null;
+            statusMessage = "Chưa có tệp nào được chọn.";
+        }
+        catch (Exception ex)
+        {
+            Notification.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Lỗi",
+                    Detail = "Có lỗi xảy ra khi lưu dữ liệu: " + ex.Message,
+                    Duration = 4000
+                });
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            fileStream = file.OpenReadStream(10 * 1024 * 1024);
+            fileName = file.Name;
+            Console.WriteLine($"Đã chọn file: {fileName}");
+            statusMessage = "Đã chọn file";
+        }
+    }
+}

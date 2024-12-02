@@ -1,0 +1,42 @@
+﻿@inherits LayoutComponentBase
+
+<div class="main-layout">
+    <header>
+        <h1></h1>
+    </header>
+    <main>
+        @Body
+    </main>
+    <footer>
+        <p>Design by Group 4</p>
+    </footer>
+</div>
+
+<style>
+    .main-layout {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    header {
+        background-color: #4CAF50;
+        color: white;
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+    main {
+        flex: 1;
+        padding: 2rem;
+        background-color: #f4f4f4;
+    }
+
+    footer {
+        background-color: #333;
+        color: white;
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+</style>

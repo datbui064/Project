@@ -1,0 +1,120 @@
+﻿@page "/BaiGiang"
+@using CEM.Models
+@using Radzen.Blazor
+@using Radzen
+@inject QlbContext _context
+@inject NotificationService Notification
+@inject MinIOService MinIOService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+<head>
+    <link rel="stylesheet" href="ViewAdd.css">
+</head>
+
+<h3>Bài Giảng</h3>
+<div class="container">
+    <div class="form-container">
+        <div class="form-group">
+            <label>Mã Bài Giảng:</label>
+            <RadzenNumeric @bind-Value="baiGiang.MaBaiGiang" class="input-field" Placeholder=" " />
+            
+        </div>
+        <div class="form-group">
+            <label>Tiêu Đề:</label>
+            <RadzenTextBox @bind-Value="baiGiang.TieuDe" class="input-field" Placeholder=" " />
+            
+        </div>
+        <div class="form-group">
+            <label>Nội Dung:</label>
+            <RadzenTextBox @bind-Value="baiGiang.NoiDung" Style="height:150px;" Multiline="true" class="input-field" Placeholder=" " />
+            
+        </div>
+        <div class="form-group">
+            <label>Đường Dẫn Tệp:</label>
+            <RadzenTextBox @bind-Value="baiGiang.DuongDanTep" class="input-field" Placeholder=" " />
+           
+        </div>
+
+
+        <div class="form-group">
+            <label class="form-label">File Đính Kèm:</label>
+            <InputFile class="input-field" OnChange="@HandleFileSelected" />
+        </div>
+
+        <p class="status-message">@statusMessage</p>
+        @* <div class="form-group">
+            <label>Mã Người Dùng:</label>
+            <RadzenNumeric @bind-Value="baiGiang.MaNguoiDung" class="input-field" />
+            
+        </div> *@
+        <div class="form-group text-right">
+            <RadzenButton Shade="Shade.Lighter" Click="Them" Text="Lưu Dữ Liệu" ButtonStyle="ButtonStyle.Primary" class="submit-button" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private BaiGiang baiGiang = new BaiGiang();
+    private Stream? fileStream;
+    private string? fileName;
+    private string? statusMessage;
+
+    private string selectedBucket = "baigiang";
+
+    private async Task Them()
+    {
+        try
+        {
+           
+
+            _context.BaiGiangs.Add(baiGiang);
+            await _context.SaveChangesAsync();
+
+            if (fileStream != null && !string.IsNullOrEmpty(fileName))
+            {
+                var success = await MinIOService.UploadFileAsync(fileStream, fileName, selectedBucket); // Assuming null for tags
+                if (!success)
+                {
+                    throw new Exception("File upload failed.");
+                }
+            }
+
+            Notification.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Thành công",
+                    Detail = "Dữ liệu đã được lưu thành công!",
+                    Duration = 4000
+                });
+
+            // Clear form fields after saving
+            baiGiang = new BaiGiang();
+            fileStream = null;
+            fileName = null;
+            statusMessage = "Chưa có tệp nào được chọn.";
+        }
+        catch (Exception ex)
+        {
+            Notification.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Lỗi",
+                    Detail = "Có lỗi xảy ra khi lưu dữ liệu: " + ex.Message,
+                    Duration = 4000
+                });
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            fileStream = file.OpenReadStream(10 * 1024 * 1024);
+            fileName = file.Name;
+            Console.WriteLine($"Đã chọn file: {fileName}");
+            statusMessage = "Đã chọn file";
+        }
+    }
+}
+

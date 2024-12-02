@@ -1,0 +1,30 @@
+﻿@page "/"
+@using CEM.Components.Layout
+@using Radzen
+@inject NavigationManager NavigationManager
+@layout ChinhLayout
+@rendermode InteractiveServer
+<RadzenBody>
+    <div class="login-container">
+        <h1>Chào mừng đến với CEM</h1>
+        <h2>Quản Lý Hồ Sơ Bài</h2>
+        <button @onclick="OnLoginClick" style="padding: 10px 20px; background-color: #1877f2; color: white; border: none; border-radius: 5px;">
+            Đăng Nhập
+        </button>
+    </div>
+</RadzenBody>
+
+@code {
+    private void OnLoginClick()
+    {
+        
+            Console.WriteLine("Nút đăng nhập đã được nhấn."); 
+            NavigationManager.NavigateTo("/login");
+       
+
+    }
+}
+
+<style>
+    
+</style>

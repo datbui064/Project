@@ -1,0 +1,64 @@
+﻿@page "/search"
+@using Dapper
+@using Microsoft.Data.SqlClient
+@inject MinIOService MinIOService
+
+<h3>Search Files by Tag</h3>
+
+<input @bind="searchTag" placeholder="Nhập tag để tìm kiếm..." />
+<button @onclick="SearchFiles">Search</button>
+
+<ul>
+    @foreach (var file in searchResults)
+    {
+        <li>@file</li>
+    }
+</ul>
+
+<p>@statusMessage</p>
+
+@code {
+    private string searchTag;
+    private List<string> searchResults = new List<string>();
+    private string statusMessage;
+
+    private async Task SearchFiles()
+    {
+        if (string.IsNullOrEmpty(searchTag))
+        {
+            statusMessage = "Vui lòng nhập tag để tìm kiếm.";
+            return;
+        }
+
+        try
+        {
+            searchResults = await FetchFilesByTagAsync(searchTag);
+            if (searchResults.Count == 0)
+            {
+                statusMessage = "Không tìm thấy file nào với tag này.";
+            }
+            else
+            {
+                statusMessage = $"Tìm thấy {searchResults.Count} file.";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Lỗi khi tìm kiếm: {ex.Message}";
+        }
+    }
+
+    private async Task<List<string>> FetchFilesByTagAsync(string tag)
+    {
+        // Truy cập cơ sở dữ liệu hoặc gọi API
+        var files = new List<string>();
+
+        using (var connection = new SqlConnection("Data Source=DatBui\\SQLEXPRESS;Initial Catalog=QLB;Integrated Security=True;Trust Server Certificate=True"))
+        {
+            var query = "SELECT FileName FROM Files WHERE Tags LIKE @Tag";
+            files = (await connection.QueryAsync<string>(query, new { Tag = $"%{tag}%" })).ToList();
+        }
+
+        return files;
+    }
+}

@@ -1,0 +1,76 @@
+﻿h3 {
+    text-align: center; /* Center align the text */
+    margin-bottom: 10px; /* Increased space below the heading */
+    font-weight: bold; /* Make the text bold */
+    color: #333; /* Darker color for visibility */
+    font-size: 28px; /* Increase font size for prominence */
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh; /* Full viewport height */
+    background-color: white /* Light gray background color */
+}
+
+.form-container {
+    background: #ffffff;
+    border-radius: 15px; /* Rounded corners */
+    box-shadow: 10px 10px 10px 20px rgba(0, 0, 0, 0.2); /* Softer shadow */
+    padding: 30px;
+    max-width: 500px; /* Max width for the form */
+    width: 100%; /* Responsive width */
+    transition: transform 0.3s; /* Smooth transition */
+}
+
+.form-container {
+    background: #ffffff;
+    border-radius: 15px; /* Rounded corners */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Softer shadow */
+    padding: 30px;
+    max-width: 500px; /* Max width for the form */
+    width: 100%; /* Responsive width */
+    transition: transform 0.3s; /* Smooth transition */
+}
+
+    .form-container:hover {
+        transform: scale(1.02); /* Slightly scale up on hover */
+    }
+
+.form-group {
+    margin-bottom: 20px; /* More space between fields */
+}
+
+.input-field {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 12px; /* Increased padding */
+    font-size: 16px; /* Larger font size */
+    transition: border-color 0.3s;
+}
+
+    .input-field:focus {
+        border-color: #007bff; /* Focus border color */
+        outline: none;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Subtle shadow on focus */
+    }
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 14px; /* Larger label font size */
+    color: #333; /* Darker label color */
+}
+
+.submit-button {
+    margin-top: 15px;
+    padding: 10px 20px; /* Increased padding for buttons */
+    font-size: 16px; /* Larger button font size */
+}
+
+.text-right {
+    text-align: right; /* Align button to the right */
+}

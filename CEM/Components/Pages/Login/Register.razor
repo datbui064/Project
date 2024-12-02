@@ -1,0 +1,93 @@
+﻿@page "/register"
+
+@using CEM.Components.Layout
+@using CEM.Models
+@using Radzen.Blazor
+@using Radzen
+@inject NotificationService Notification
+@inject UserService UserService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+@layout AuthLayout
+
+<h3>Đăng Ký</h3>
+
+<EditForm Model="newUser" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="tenDangNhap">Tên Đăng Nhập:</label>
+        <InputText id="tenDangNhap" @bind-Value="newUser.TenDangNhap" required class="form-control" />
+        <ValidationMessage For="@(() => newUser.TenDangNhap)" />
+    </div>
+
+    <div class="form-group">
+        <label for="matKhau">Mật Khẩu:</label>
+        <InputText id="matKhau" type="password" @bind-Value="newUser.MatKhau" required class="form-control" />
+        <ValidationMessage For="@(() => newUser.MatKhau)" />
+    </div>
+
+    <div class="form-group">
+        <label for="hoTen">Họ Tên:</label>
+        <InputText id="hoTen" @bind-Value="newUser.HoTen" required class="form-control" />
+        <ValidationMessage For="@(() => newUser.HoTen)" />
+    </div>
+
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <InputText id="email" @bind-Value="newUser.Email" required class="form-control" />
+        <ValidationMessage For="@(() => newUser.Email)" />
+    </div>
+
+    <div class="form-group">
+        <label for="soDienThoai">Số Điện Thoại:</label>
+        <InputText id="soDienThoai" @bind-Value="newUser.SoDienThoai" class="form-control" />
+        <ValidationMessage For="@(() => newUser.SoDienThoai)" />
+    </div>
+
+    <div class="form-group">
+        <label for="vaiTro">Vai Trò:</label>
+        <InputText id="vaiTro" @bind-Value="newUser.VaiTro" class="form-control" />
+        <ValidationMessage For="@(() => newUser.VaiTro)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Đăng Ký</button>
+
+    @if (registrationFailed)
+    {
+        <p class="text-danger">Tên đăng nhập đã tồn tại!</p>
+    }
+</EditForm>
+
+@code {
+    private NguoiDung newUser = new NguoiDung();
+    private bool registrationFailed = false;
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            var success = await UserService.RegisterAsync(newUser);
+            if (success)
+            {
+                // Đăng ký thành công, thông báo và chuyển hướng đến trang đăng nhập
+                Notification.Notify(NotificationSeverity.Success, "Đăng ký thành công", "Bạn có thể đăng nhập ngay bây giờ!");
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                // Đăng ký thất bại, tên đăng nhập đã tồn tại
+                registrationFailed = true;
+                Notification.Notify(NotificationSeverity.Error, "Đăng ký thất bại", "Tên đăng nhập đã tồn tại!");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Ghi log lỗi và thông báo cho người dùng
+            Console.WriteLine($"Error during registration: {ex.Message}");
+            Notification.Notify(NotificationSeverity.Error, "Lỗi hệ thống", "Có lỗi xảy ra trong quá trình đăng ký!");
+        }
+    }
+}
+

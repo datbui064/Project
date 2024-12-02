@@ -1,0 +1,70 @@
+﻿@page "/upload"
+@inject MinIOService MinIOService
+@rendermode InteractiveServer
+
+<h3>Upload File to MinIO</h3>
+
+<InputFile OnChange="@HandleFileSelected" />
+<br />
+
+<label>Chọn loại tài liệu:</label>
+<select @bind="selectedTag">
+    @foreach (var tag in tagOptions)
+    {
+        <option value="@tag.Key">@tag.Value</option>
+    }
+</select>
+
+<button @onclick="UploadFile">Upload</button>
+
+<p>@statusMessage</p>
+
+@code {
+    private Stream? fileStream;
+    private string? fileName;
+    private string? statusMessage;
+
+    // Danh sách các nametag cố định
+    private Dictionary<string, string> tagOptions = new Dictionary<string, string>
+    {
+        { "quyetdinh", "Quyết định" },
+        { "decuong", "Đề Cương" },
+        { "kehoachgiangday", "Kế Hoạch Giảng Dạy" },
+        { "baocao", "Báo cáo" },
+        { "cauhoi", "Câu hỏi" },
+        { "tailieuhoctap", "Tài liệu học tập" },
+        { "phuongtiencongcu", "Phương tiện công cụ" },
+        { "baigiang", "Bài giảng" },
+        // { "image", "Hình ảnh" },
+        // { "video", "Video" },
+        // { "audio", "Âm thanh" }
+    };
+
+    private string? selectedTag; // Nametag được chọn
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            fileStream = file.OpenReadStream(10 * 1024 * 1024); // 10MB limit
+            fileName = file.Name;
+        }
+    }
+
+    private async Task UploadFile()
+    {
+        if (fileStream != null && !string.IsNullOrEmpty(selectedTag))
+        {
+            // Tạo metadata với nametag được chọn
+            var tags = new Dictionary<string, string> { { "category", selectedTag } };
+
+            var success = await MinIOService.UploadFileAsync(fileStream, fileName, null);
+            statusMessage = success ? "Upload thành công!" : "Upload thất bại.";
+        }
+        else
+        {
+            statusMessage = "Chưa chọn file hoặc nametag.";
+        }
+    }
+}

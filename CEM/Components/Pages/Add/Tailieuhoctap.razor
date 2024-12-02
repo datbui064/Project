@@ -1,0 +1,136 @@
+﻿@page "/TaiLieuHocTap"
+@using CEM.Models
+@using Radzen.Blazor
+@using Radzen
+@inject QlbContext _context
+@inject NotificationService Notification
+@inject MinIOService MinIOService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+<head>
+    <link rel="stylesheet" href="ViewAdd.css">
+</head>
+
+<h3>Tài Liệu Học Tập</h3>
+<div class="container">
+    <div class="form-container">
+        <!-- Mã Tài Liệu -->
+        <div class="form-group">
+            <label>Mã Tài Liệu:</label>
+            <RadzenNumeric @bind-Value="taiLieu.MaTaiLieu" />
+        </div>
+
+        <!-- Tên Tài Liệu -->
+        <div class="form-group">
+            <label>Tên Tài Liệu:</label>
+            <RadzenTextBox @bind-Value="taiLieu.TenTaiLieu" />
+        </div>
+
+        <!-- Tác Giả -->
+        <div class="form-group">
+            <label>Tác Giả:</label>
+            <RadzenTextBox @bind-Value="taiLieu.TacGia" />
+        </div>
+
+        <!-- Năm Xuất Bản -->
+        <div class="form-group">
+            <label>Năm Xuất Bản:</label>
+            <RadzenNumeric @bind-Value="taiLieu.NamXuatBan" />
+        </div>
+
+        <!-- Nhà Xuất Bản -->
+        <div class="form-group">
+            <label>Nhà Xuất Bản:</label>
+            <RadzenTextBox @bind-Value="taiLieu.NhaXuatBan" />
+        </div>
+
+        <!-- Loại Tài Liệu -->
+        <div class="form-group">
+            <label>Loại Tài Liệu:</label>
+            <RadzenTextBox @bind-Value="taiLieu.LoaiTaiLieu" />
+        </div>
+
+        <!-- Đường Dẫn Tài Liệu -->
+        <div class="form-group">
+            <label>Đường Dẫn Tài Liệu:</label>
+            <RadzenTextBox @bind-Value="taiLieu.DuongDan" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">File Đính Kèm:</label>
+            <InputFile class="input-field" OnChange="@HandleFileSelected" />
+        </div>
+
+        <p class="status-message">@statusMessage</p>
+
+        <!-- Nút Lưu -->
+        <div class="form-group text-right">
+            <RadzenButton Shade="Shade.Lighter" Click="Them" Text="Lưu Dữ Liệu" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private TaiLieuHocTap taiLieu = new TaiLieuHocTap();
+    private Stream? fileStream;
+    private string? fileName;
+    private string? statusMessage;
+
+    private string selectedBucket = "kehoachbaigiang";
+
+    private async Task Them()
+    {
+        try
+        {
+
+
+            _context.TaiLieuHocTaps.Add(taiLieu);
+            await _context.SaveChangesAsync();
+
+            if (fileStream != null && !string.IsNullOrEmpty(fileName))
+            {
+                var success = await MinIOService.UploadFileAsync(fileStream, fileName, selectedBucket); // Assuming null for tags
+                if (!success)
+                {
+                    throw new Exception("File upload failed.");
+                }
+            }
+
+            Notification.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Thành công",
+                    Detail = "Dữ liệu đã được lưu thành công!",
+                    Duration = 4000
+                });
+
+            // Clear form fields after saving
+            taiLieu = new TaiLieuHocTap();
+            fileStream = null;
+            fileName = null;
+            statusMessage = "Chưa có tệp nào được chọn.";
+        }
+        catch (Exception ex)
+        {
+            Notification.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Lỗi",
+                    Detail = "Có lỗi xảy ra khi lưu dữ liệu: " + ex.Message,
+                    Duration = 4000
+                });
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            fileStream = file.OpenReadStream(10 * 1024 * 1024);
+            fileName = file.Name;
+            Console.WriteLine($"Đã chọn file: {fileName}");
+            statusMessage = "Đã chọn file";
+        }
+    }
+}

@@ -1,0 +1,65 @@
+﻿@page "/buckets"
+@inject MinIOService MinIOService
+@rendermode InteractiveServer
+
+<h3>Quản lý Buckets</h3>
+
+<input @bind="newBucketName" placeholder="Tên bucket mới..." />
+<button @onclick="CreateBucketAsync">Tạo Bucket</button>
+
+<h4>Danh sách Buckets:</h4>
+<ul>
+    @foreach (var bucket in bucketList)
+    {
+        <li>
+            @bucket
+            <button @onclick="@(() => LoadFiles(bucket))">Xem File</button>
+        </li>
+    }
+</ul>
+
+@if (selectedBucket != null)
+{
+    <h4>Files trong Bucket: @selectedBucket</h4>
+    <ul>
+        @foreach (var file in fileList)
+        {
+            <li>@file</li>
+        }
+    </ul>
+}
+
+@code {
+    private string? newBucketName;
+    private List<string> bucketList = new List<string>();
+    private List<string> fileList = new List<string>();
+    private string? selectedBucket;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBuckets();
+    }
+
+    private async Task LoadBuckets()
+    {
+        bucketList = await MinIOService.ListBucketsAsync();
+    }
+
+    private async Task CreateBucketAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(newBucketName))
+        {
+            bool created = await MinIOService.CreateBucketAsync(newBucketName);
+            if (created)
+            {
+                await LoadBuckets(); // Refresh danh sách bucket
+            }
+        }
+    }
+
+    private async Task LoadFiles(string bucketName)
+    {
+        selectedBucket = bucketName;
+        fileList = await MinIOService.ListFilesInBucketAsync(bucketName);
+    }
+}

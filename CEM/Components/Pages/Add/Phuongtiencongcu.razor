@@ -1,0 +1,118 @@
+﻿@page "/PhuongTienCongCu"
+@using CEM.Models
+@using Radzen.Blazor
+@using Radzen
+@inject QlbContext _context
+@inject NotificationService Notification
+@inject MinIOService MinIOService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+<head>
+    <link rel="stylesheet" href="ViewAdd.css">
+</head>
+
+<h3>Phương Tiện Công Cụ</h3>
+<div class="container">
+    <div class="form-container">
+        <!-- Mã Công Cụ -->
+        <div class="form-group">
+            <label>Mã Công Cụ:</label>
+            <RadzenNumeric @bind-Value="phuongTienCongCu.MaCongCu" />
+        </div>
+
+        <!-- Tên Công Cụ -->
+        <div class="form-group">
+            <label>Tên Công Cụ:</label>
+            <RadzenTextBox @bind-Value="phuongTienCongCu.TenCongCu" />
+        </div>
+
+        <!-- Mô Tả -->
+        <div class="form-group">
+            <label>Mô Tả:</label>
+            <RadzenTextBox @bind-Value="phuongTienCongCu.MoTa" Multiline="true" />
+        </div>
+
+        <!-- Đường Dẫn Tệp -->
+        <div class="form-group">
+            <label>Đường Dẫn Tệp:</label>
+            <RadzenTextBox @bind-Value="phuongTienCongCu.DuongDanTep" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">File Đính Kèm:</label>
+            <InputFile class="input-field" OnChange="@HandleFileSelected" />
+        </div>
+
+        <p class="status-message">@statusMessage</p>
+
+        <!-- Nút Lưu -->
+        <div class="form-group text-right">
+            <RadzenButton Shade="Shade.Lighter" Click="Them" Text="Lưu Dữ Liệu" ButtonStyle="ButtonStyle.Primary" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private PhuongTienCongCu phuongTienCongCu = new PhuongTienCongCu();
+    private Stream? fileStream;
+    private string? fileName;
+    private string? statusMessage;
+
+    private string selectedBucket = "phuongtiencongcu";
+
+    private async Task Them()
+    {
+        try
+        {
+
+
+            _context.PhuongTienCongCus.Add(phuongTienCongCu);
+            await _context.SaveChangesAsync();
+
+            if (fileStream != null && !string.IsNullOrEmpty(fileName))
+            {
+                var success = await MinIOService.UploadFileAsync(fileStream, fileName, selectedBucket); // Assuming null for tags
+                if (!success)
+                {
+                    throw new Exception("File upload failed.");
+                }
+            }
+
+            Notification.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Success,
+                    Summary = "Thành công",
+                    Detail = "Dữ liệu đã được lưu thành công!",
+                    Duration = 4000
+                });
+
+            // Clear form fields after saving
+            phuongTienCongCu = new PhuongTienCongCu();
+            fileStream = null;
+            fileName = null;
+            statusMessage = "Chưa có tệp nào được chọn.";
+        }
+        catch (Exception ex)
+        {
+            Notification.Notify(new NotificationMessage
+                {
+                    Severity = NotificationSeverity.Error,
+                    Summary = "Lỗi",
+                    Detail = "Có lỗi xảy ra khi lưu dữ liệu: " + ex.Message,
+                    Duration = 4000
+                });
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            fileStream = file.OpenReadStream(10 * 1024 * 1024);
+            fileName = file.Name;
+            Console.WriteLine($"Đã chọn file: {fileName}");
+            statusMessage = "Đã chọn file";
+        }
+    }
+}

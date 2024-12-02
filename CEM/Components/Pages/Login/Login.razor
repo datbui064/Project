@@ -1,0 +1,74 @@
+﻿@page "/login"
+
+@using CEM.Components.Layout
+@using CEM.Models
+@using Radzen.Blazor
+@using Radzen
+@layout AuthLayout
+@inject NotificationService Notification
+@inject UserService UserService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<h3>Đăng Nhập</h3>
+
+<EditForm Model="user" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label for="tenDangNhap">Tên Đăng Nhập:</label>
+        <InputText id="tenDangNhap" @bind-Value="user.TenDangNhap" required />
+        <ValidationMessage For="@(() => user.TenDangNhap)" />
+    </div>
+
+    <div>
+        <label for="matKhau">Mật Khẩu:</label>
+        <InputText id="matKhau" type="password" @bind-Value="user.MatKhau" required />
+        <ValidationMessage For="@(() => user.MatKhau)" />
+    </div>
+
+    <button type="submit">Đăng Nhập</button>
+    <button type="button" @onclick="Register">Đăng Ký</button>
+
+    @if (loginFailed)
+    {
+        <p style="color:red;">Tên đăng nhập hoặc mật khẩu không đúng!</p>
+    }
+</EditForm>
+
+@code {
+    private NguoiDung user = new NguoiDung();
+    private bool loginFailed = false;
+
+    private void Register()
+    {
+        NavigationManager.NavigateTo("/register");
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            var loggedInUser = await UserService.LoginAsync(user.TenDangNhap, user.MatKhau);
+
+            if (loggedInUser != null)
+            {
+                // Thông báo thành công và chuyển hướng
+                Notification.Notify(NotificationSeverity.Success, "Đăng nhập thành công", $"Chào mừng {loggedInUser.TenDangNhap}!");
+                NavigationManager.NavigateTo("/about"); // Chuyển hướng đến trang chủ
+            }
+            else
+            {
+                loginFailed = true;
+                Notification.Notify(NotificationSeverity.Error, "Đăng nhập thất bại", "Tên đăng nhập hoặc mật khẩu không đúng!");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Ghi log lỗi và hiển thị thông báo
+            Console.WriteLine($"Error during login: {ex.Message}");
+            Notification.Notify(NotificationSeverity.Error, "Lỗi hệ thống", "Có lỗi xảy ra trong quá trình đăng nhập!");
+        }
+    }
+}
